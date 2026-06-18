@@ -423,7 +423,7 @@ function buildSlides() {
     slide.className = 'slide';
 
     // Photo or placeholder
-    const isPlaceholder = !p.src || p.src.includes('photo-');
+    const isPlaceholder = !p.src;
     if (isPlaceholder) {
       slide.innerHTML += `<div class="slide-placeholder"><span style="font-size:3rem">🛼</span>photo ${i+1}</div>`;
     } else {
