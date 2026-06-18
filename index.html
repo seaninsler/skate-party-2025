@@ -129,8 +129,10 @@
     /* Photo */
     .slide-photo {
       position: absolute;
-      inset: 56px;          /* space for border decorations */
-      object-fit: cover;
+      inset: 56px;
+      width: calc(100% - 112px);
+      height: calc(100% - 112px);
+      object-fit: contain;
       border-radius: 4px;
       z-index: 1;
     }
