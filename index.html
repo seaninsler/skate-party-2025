@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🛼 Skate Party! 🛼</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;700&display=swap');
+
+    :root {
+      --neon-pink: #ff2d9b;
+      --neon-teal: #00f5d4;
+      --neon-purple: #bf00ff;
+      --neon-yellow: #ffe600;
+      --dark-bg: #0d0014;
+      --mid-bg: #1a0033;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--dark-bg);
+      font-family: 'Nunito', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* ── TITLE SCREEN ── */
+    #title-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at center, #2a0050 0%, #0d0014 70%);
+      cursor: pointer;
+      transition: opacity 0.8s ease;
+    }
+    #title-screen.hidden { opacity: 0; pointer-events: none; }
+
+    .title-skate-row {
+      display: flex;
+      gap: 18px;
+      margin-bottom: 24px;
+      animation: roll-row 3s linear infinite;
+    }
+    @keyframes roll-row {
+      0%   { transform: translateX(-10px); }
+      50%  { transform: translateX(10px); }
+      100% { transform: translateX(-10px); }
+    }
+
+    .title-main {
+      font-family: 'Boogaloo', cursive;
+      font-size: clamp(3rem, 10vw, 6rem);
+      letter-spacing: 4px;
+      text-align: center;
+      background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple), var(--neon-teal));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 18px #ff2d9b88);
+      line-height: 1.1;
+    }
+
+    .title-sub {
+      font-family: 'Boogaloo', cursive;
+      font-size: clamp(1rem, 3vw, 1.6rem);
+      color: var(--neon-teal);
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      margin-top: 12px;
+      text-shadow: 0 0 12px var(--neon-teal);
+    }
+
+    .title-hint {
+      margin-top: 40px;
+      font-size: 0.95rem;
+      color: #ffffff88;
+      letter-spacing: 2px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+    /* ── GRID OF STARS (title bg) ── */
+    .star-field {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: white;
+      animation: twinkle var(--dur) ease-in-out infinite;
+    }
+    @keyframes twinkle { 0%,100% { opacity: 0.1; transform: scale(1); } 50% { opacity: 1; transform: scale(1.4); } }
+
+    /* ── SLIDESHOW WRAPPER ── */
+    #slideshow {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    /* ── SLIDES ── */
+    .slides-track {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      transition: transform 0.6s cubic-bezier(0.77,0,0.18,1);
+    }
+
+    .slide {
+      flex: 0 0 100vh;
+      height: 100vh;
+      width: 100vw;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Photo */
+    .slide-photo {
+      position: absolute;
+      inset: 56px;          /* space for border decorations */
+      object-fit: cover;
+      border-radius: 4px;
+      z-index: 1;
+    }
+
+    /* ── BORDER DECORATIONS ── */
+    .border-frame {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* Gradient border lines */
+    .border-frame::before,
+    .border-frame::after {
+      content: '';
+      position: absolute;
+      left: 12px; right: 12px;
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--neon-pink), var(--neon-purple), var(--neon-teal), var(--neon-yellow), var(--neon-pink));
+      background-size: 200% 100%;
+      animation: gradient-shift 4s linear infinite;
+    }
+    .border-frame::before { top: 12px; }
+    .border-frame::after  { bottom: 12px; }
+
+    @keyframes gradient-shift { 0% { background-position: 0% 0; } 100% { background-position: 200% 0; } }
+
+    /* Side lines */
+    .border-side {
+      position: absolute;
+      top: 12px; bottom: 12px;
+      width: 6px;
+      border-radius: 3px;
+      background: linear-gradient(180deg, var(--neon-pink), var(--neon-purple), var(--neon-teal), var(--neon-yellow), var(--neon-pink));
+      background-size: 100% 200%;
+      animation: gradient-shift-v 4s linear infinite;
+    }
+    .border-side.left  { left: 12px; }
+    .border-side.right { right: 12px; }
+    @keyframes gradient-shift-v { 0% { background-position: 0 0%; } 100% { background-position: 0 200%; } }
+
+    /* Corner skate SVGs */
+    .corner-skate {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      z-index: 3;
+    }
+    .corner-skate.tl { top: 20px;    left: 20px;  transform: rotate(-30deg); }
+    .corner-skate.tr { top: 20px;    right: 20px; transform: rotate(30deg) scaleX(-1); }
+    .corner-skate.bl { bottom: 20px; left: 20px;  transform: rotate(30deg); }
+    .corner-skate.br { bottom: 20px; right: 20px; transform: rotate(-30deg) scaleX(-1); }
+
+    /* Slide counter */
+    .slide-counter {
+      position: absolute;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Boogaloo', cursive;
+      font-size: 1rem;
+      color: var(--neon-yellow);
+      letter-spacing: 3px;
+      text-shadow: 0 0 8px var(--neon-yellow);
+      z-index: 4;
+    }
+
+    /* Caption */
+    .slide-caption {
+      position: absolute;
+      top: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Boogaloo', cursive;
+      font-size: 1.1rem;
+      color: #fff;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px var(--neon-pink);
+      white-space: nowrap;
+      z-index: 4;
+    }
+
+    /* ── ROLLING SKATES (bottom ticker) ── */
+    .skate-ticker {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 44px;
+      overflow: hidden;
+      z-index: 10;
+      pointer-events: none;
+    }
+    .skate-ticker-inner {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+      animation: ticker-roll 12s linear infinite;
+      white-space: nowrap;
+      padding-left: 100%;
+    }
+    @keyframes ticker-roll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .ticker-skate { font-size: 1.6rem; }
+
+    /* ── NAV ARROWS ── */
+    .nav-btn {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 20;
+      background: rgba(0,0,0,0.45);
+      border: 2px solid var(--neon-pink);
+      color: var(--neon-pink);
+      font-size: 1.8rem;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+      text-shadow: 0 0 8px var(--neon-pink);
+    }
+    .nav-btn:hover { background: var(--neon-pink); color: #fff; border-color: #fff; }
+    .nav-btn.prev { left: 16px; }
+    .nav-btn.next { right: 16px; }
+
+    /* ── SPARKLE OVERLAY ── */
+    .sparkle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 50;
+      font-size: 1.4rem;
+      animation: sparkle-fall 1.6s ease-out forwards;
+    }
+    @keyframes sparkle-fall {
+      0%   { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+      100% { opacity: 0; transform: translateY(60px) scale(0.3) rotate(180deg); }
+    }
+
+    /* placeholder bg when no photo */
+    .slide-placeholder {
+      position: absolute;
+      inset: 56px;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1a0033, #2a0050);
+      color: #ffffff55;
+      font-family: 'Boogaloo', cursive;
+      font-size: 1.4rem;
+      letter-spacing: 2px;
+      gap: 12px;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ TITLE SCREEN ══════════════ -->
+<div id="title-screen">
+  <div class="star-field" id="starField"></div>
+  <div class="title-skate-row">
+    <span style="font-size:2.4rem">🛼</span>
+    <span style="font-size:2.4rem">⭐</span>
+    <span style="font-size:2.4rem">🛼</span>
+    <span style="font-size:2.4rem">✨</span>
+    <span style="font-size:2.4rem">🛼</span>
+  </div>
+  <div class="title-main">SKATE PARTY<br>2025</div>
+  <div class="title-sub">✦ roll with the good times ✦</div>
+  <div class="title-hint">✨ tap anywhere to start ✨</div>
+</div>
+
+<!-- ══════════════ SLIDESHOW ══════════════ -->
+<div id="slideshow">
+  <div class="slides-track" id="slidesTrack">
+    <!-- Slides injected by JS -->
+  </div>
+</div>
+
+<!-- Rolling skate ticker -->
+<div class="skate-ticker">
+  <div class="skate-ticker-inner" id="tickerInner"></div>
+</div>
+
+<!-- Nav buttons -->
+<button class="nav-btn prev" id="prevBtn" onclick="changeSlide(-1)">&#8593;</button>
+<button class="nav-btn next" id="nextBtn" onclick="changeSlide(1)">&#8595;</button>
+
+<script>
+// ══════════════════════════════════════════════════
+//  🛼  CONFIGURATION — edit this section!
+// ══════════════════════════════════════════════════
+
+const PARTY_TITLE = "Skate Party 2025"; // shown on title screen
+const PARTY_SUBTITLE = "roll with the good times";
+
+// Add your photo file paths here.
+// Put your images in a folder called "photos/" next to this index.html
+// Then list them below, e.g.:  "photos/img001.jpg"
+// You can also add an optional caption per photo.
+const PHOTOS = [
+  { src: "photos/photo-01.jpg", caption: "" },
+  { src: "photos/photo-02.jpg", caption: "" },
+  { src: "photos/photo-03.jpg", caption: "" },
+  { src: "photos/photo-04.jpg", caption: "" },
+  { src: "photos/photo-05.jpg", caption: "" },
+  { src: "photos/photo-06.jpg", caption: "" },
+  { src: "photos/photo-07.jpg", caption: "" },
+  { src: "photos/photo-08.jpg", caption: "" },
+  { src: "photos/photo-09.jpg", caption: "" },
+  { src: "photos/photo-10.jpg", caption: "" },
+  { src: "photos/photo-11.jpg", caption: "" },
+  { src: "photos/photo-12.jpg", caption: "" },
+  { src: "photos/photo-13.jpg", caption: "" },
+  { src: "photos/photo-14.jpg", caption: "" },
+  { src: "photos/photo-15.jpg", caption: "" },
+  { src: "photos/photo-16.jpg", caption: "" },
+  { src: "photos/photo-17.jpg", caption: "" },
+  { src: "photos/photo-18.jpg", caption: "" },
+  { src: "photos/photo-19.jpg", caption: "" },
+  { src: "photos/photo-20.jpg", caption: "" },
+  { src: "photos/photo-21.jpg", caption: "" },
+  { src: "photos/photo-22.jpg", caption: "" },
+  { src: "photos/photo-23.jpg", caption: "" },
+  { src: "photos/photo-24.jpg", caption: "" },
+  { src: "photos/photo-25.jpg", caption: "" },
+  { src: "photos/photo-26.jpg", caption: "" },
+  { src: "photos/photo-27.jpg", caption: "" },
+  { src: "photos/photo-28.jpg", caption: "" },
+  { src: "photos/photo-29.jpg", caption: "" },
+  { src: "photos/photo-30.jpg", caption: "" },
+  { src: "photos/photo-31.jpg", caption: "" },
+  { src: "photos/photo-32.jpg", caption: "" },
+  { src: "photos/photo-33.jpg", caption: "" },
+  { src: "photos/photo-34.jpg", caption: "" },
+  { src: "photos/photo-35.jpg", caption: "" },
+  { src: "photos/photo-36.jpg", caption: "" },
+  { src: "photos/photo-37.jpg", caption: "" },
+  { src: "photos/photo-38.jpg", caption: "" },
+  { src: "photos/photo-39.jpg", caption: "" },
+  { src: "photos/photo-40.jpg", caption: "" },
+  { src: "photos/photo-41.jpg", caption: "" },
+  { src: "photos/photo-42.jpg", caption: "" },
+  { src: "photos/photo-43.jpg", caption: "" },
+  { src: "photos/photo-44.jpg", caption: "" },
+  { src: "photos/photo-45.jpg", caption: "" },
+  { src: "photos/photo-46.jpg", caption: "" },
+  { src: "photos/photo-47.jpg", caption: "" },
+  { src: "photos/photo-48.jpg", caption: "" },
+  { src: "photos/photo-49.jpg", caption: "" },
+  { src: "photos/photo-50.jpg", caption: "" },
+  { src: "photos/photo-51.jpg", caption: "" },
+  { src: "photos/photo-52.jpg", caption: "" },
+  { src: "photos/photo-53.jpg", caption: "" },
+  { src: "photos/photo-54.jpg", caption: "" },
+  { src: "photos/photo-55.jpg", caption: "" },
+  { src: "photos/photo-56.jpg", caption: "" },
+];
+
+// ══════════════════════════════════════════════════
+//  SLIDE BUILDER
+// ══════════════════════════════════════════════════
+
+const SKATE_EMOJI = "🛼";
+const SPARKLES   = ["✨","⭐","💫","🌟","✦","★"];
+
+// Roller skate SVG (inline so no external files needed)
+const skateSVG = `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="8" y="24" width="36" height="20" rx="5" fill="#ff2d9b" stroke="#ffe600" stroke-width="2"/>
+  <rect x="4" y="40" width="44" height="10" rx="4" fill="#bf00ff" stroke="#00f5d4" stroke-width="2"/>
+  <circle cx="14" cy="54" r="6" fill="#00f5d4" stroke="#fff" stroke-width="2"/>
+  <circle cx="38" cy="54" r="6" fill="#00f5d4" stroke="#fff" stroke-width="2"/>
+  <rect x="20" y="10" width="6" height="16" rx="2" fill="#ffe600"/>
+  <rect x="14" y="14" width="18" height="4" rx="2" fill="#ff2d9b"/>
+  <circle cx="14" cy="54" r="2.5" fill="#1a0033"/>
+  <circle cx="38" cy="54" r="2.5" fill="#1a0033"/>
+</svg>`;
+
+function buildSlides() {
+  const track = document.getElementById('slidesTrack');
+  PHOTOS.forEach((p, i) => {
+    const slide = document.createElement('div');
+    slide.className = 'slide';
+
+    // Photo or placeholder
+    const isPlaceholder = !p.src || p.src.includes('photo-');
+    if (isPlaceholder) {
+      slide.innerHTML += `<div class="slide-placeholder"><span style="font-size:3rem">🛼</span>photo ${i+1}</div>`;
+    } else {
+      slide.innerHTML += `<img class="slide-photo" src="${p.src}" alt="Party photo ${i+1}">`;
+    }
+
+    // Caption
+    if (p.caption) {
+      slide.innerHTML += `<div class="slide-caption">${p.caption}</div>`;
+    }
+
+    // Border frame
+    slide.innerHTML += `
+      <div class="border-frame">
+        <div class="border-side left"></div>
+        <div class="border-side right"></div>
+      </div>
+    `;
+
+    // Corner skates
+    ['tl','tr','bl','br'].forEach(pos => {
+      const div = document.createElement('div');
+      div.className = `corner-skate ${pos}`;
+      div.innerHTML = skateSVG;
+      slide.appendChild(div);
+    });
+
+    // Counter
+    slide.innerHTML += `<div class="slide-counter">🛼 ${i+1} / ${PHOTOS.length} 🛼</div>`;
+
+    track.appendChild(slide);
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════
+
+let current = 0;
+
+const preloaded = new Set();
+
+function preloadAhead(fromIdx, count = 6) {
+  for (let i = fromIdx; i <= Math.min(fromIdx + count, PHOTOS.length - 1); i++) {
+    if (!preloaded.has(i) && PHOTOS[i].src) {
+      const img = new Image();
+      img.src = PHOTOS[i].src;
+      preloaded.add(i);
+    }
+  }
+}
+
+function goTo(idx) {
+  current = Math.max(0, Math.min(PHOTOS.length - 1, idx));
+  document.getElementById('slidesTrack').style.transform = `translateY(-${current * 100}vh)`;
+  document.getElementById('prevBtn').style.opacity = current === 0 ? '0.3' : '1';
+  document.getElementById('nextBtn').style.opacity = current === PHOTOS.length-1 ? '0.3' : '1';
+  preloadAhead(current + 1, 6);
+}
+
+function changeSlide(dir) {
+  goTo(current + dir);
+  spawnSparkle();
+}
+
+// Touch/swipe support
+let touchStartY = 0;
+document.getElementById('slideshow').addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; });
+document.getElementById('slideshow').addEventListener('touchend', e => {
+  const dy = touchStartY - e.changedTouches[0].clientY;
+  if (Math.abs(dy) > 40) changeSlide(dy > 0 ? 1 : -1);
+});
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') changeSlide(1);
+  if (e.key === 'ArrowUp'   || e.key === 'ArrowLeft')  changeSlide(-1);
+});
+
+// Wheel
+let wheelCooldown = false;
+document.addEventListener('wheel', e => {
+  if (wheelCooldown) return;
+  changeSlide(e.deltaY > 0 ? 1 : -1);
+  wheelCooldown = true;
+  setTimeout(() => { wheelCooldown = false; }, 700);
+});
+
+// ══════════════════════════════════════════════════
+//  SPARKLE FX
+// ══════════════════════════════════════════════════
+
+function spawnSparkle() {
+  for (let i = 0; i < 5; i++) {
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    s.textContent = SPARKLES[Math.floor(Math.random() * SPARKLES.length)];
+    s.style.left = Math.random() * 90 + 5 + 'vw';
+    s.style.top  = Math.random() * 70 + 5 + 'vh';
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 1700);
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  TICKER
+// ══════════════════════════════════════════════════
+
+function buildTicker() {
+  const inner = document.getElementById('tickerInner');
+  const items = ["🛼","⭐","🛼","✨","🛼","💫","🛼","🌟"];
+  // duplicate for seamless loop
+  [...items, ...items, ...items, ...items].forEach(e => {
+    const span = document.createElement('span');
+    span.className = 'ticker-skate';
+    span.textContent = e;
+    inner.appendChild(span);
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  STAR FIELD (title screen)
+// ══════════════════════════════════════════════════
+
+function buildStars() {
+  const field = document.getElementById('starField');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 3 + 1;
+    s.style.cssText = `
+      width:${size}px; height:${size}px;
+      top:${Math.random()*100}%; left:${Math.random()*100}%;
+      --dur:${1.5 + Math.random()*3}s;
+      animation-delay:${Math.random()*3}s;
+    `;
+    field.appendChild(s);
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  TITLE SCREEN DISMISS
+// ══════════════════════════════════════════════════
+
+document.getElementById('title-screen').addEventListener('click', () => {
+  const ts = document.getElementById('title-screen');
+  ts.classList.add('hidden');
+  setTimeout(() => ts.remove(), 900);
+  spawnSparkle();
+});
+
+// ══════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════
+
+buildStars();
+buildTicker();
+buildSlides();
+goTo(0);
+preloadAhead(0, 6);
+</script>
+</body>
+</html>
